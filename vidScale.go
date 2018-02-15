@@ -1,7 +1,8 @@
 /*****************************
- * piFanControl
- * CCBY Roy Dybing, Feb. 2017
- * github.com/rDybing
+ * videoScale
+ * CC-BY Roy Dybing, Feb. 2018
+ * github: rDybing
+ * slack:  rdybing
  *****************************/
 package main
 
@@ -9,47 +10,98 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 )
 
-type state_t struct {
-	tempC    int
-	fanOn    bool
-	limitOn  int
-	limitOff int
+type video_t struct {
+	width  int
+	height int
 }
-
-var fanPin int
 
 func main() {
-	origW, origH := getDimensions()
-	fmt.Printf("w: %3d :: h: %3d\n", origW, origH)
+	var ok bool
+	var inFile string
+
+	for ok == false {
+		inFile = getInput("Name of file to scale:")
+		if _, err := os.Stat(inFile); err != nil {
+			fmt.Println("No such file, try again...")
+			ok = false
+		} else {
+			ok = true
+		}
+	}
+
+	oldVid := getDimensions(inFile)
+	fmt.Printf("old - w: %3d :: h: %3d\n", oldVid.width, oldVid.height)
+
+	if oldVid.height != 512 || oldVid.width != 512 {
+		newVid := calcNewSize(oldVid)
+		fmt.Printf("new - w: %3d :: h: %3d\n", newVid.width, newVid.height)
+		outFile := getInput("Save as (.mp4 will be added):")
+		outFile += ".mp4"
+		scaleNewFile(inFile, outFile, newVid)
+	}
 }
 
-func getDimensions() (int, int) {
+func getDimensions(inFile string) video_t {
 	fmt.Println("Getting Dimensions")
-	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "default=noprint_wrappers=1", "in.mp4")
+	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "default=noprint_wrappers=1", inFile)
 	cmdOutput := &bytes.Buffer{}
 	cmd.Stdout = cmdOutput
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("Error running ffprobe: %v\n", err)
 	}
 	tStr := string(cmdOutput.Bytes())
-	width, height := cleanString(tStr)
-	return width, height
+	return cleanString(tStr)
 }
 
-func cleanString(s string) (int, int) {
+func scaleNewFile(inFile string, outFile string, vid video_t) {
+	outSize := fmt.Sprintf("%d:%d", vid.width, vid.height)
+	cmd := exec.Command("ffmpeg", "-i", inFile, "-f", "mp4", "-c:v", "libx264", "-r", "30", "-s:v", outSize, "-c:a", "aac", "-b:a", "128k", "-ar", "44100", outFile)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Error running ffmpeg: %v\n%s\n", err, stderr.String())
+	}
+	fmt.Println("Success!")
+}
+
+func calcNewSize(in video_t) video_t {
+	var out video_t
+	out.height = 512
+	scaleValue := float32(out.height) / float32(in.height)
+	out.width = int(float32(in.width) * scaleValue)
+	for out.width%16 != 0 {
+		out.width++
+	}
+	return out
+}
+
+func getInput(helpText string) string {
+	var input string
+	fmt.Println(helpText)
+	fmt.Scanf("%s\n", &input)
+	return input
+}
+
+func cleanString(s string) video_t {
+	var vid video_t
 	s = strings.Replace(s, "width=", "", -1)
 	s = strings.Replace(s, "height=", "", -1)
-	//s = strings.Replace(s, "\n", "", -1)
 	result := strings.Split(s, "\n")
-	width, err := strconv.Atoi(result[0])
-	height, err := strconv.Atoi(result[1])
+	w, err := strconv.Atoi(result[0])
 	if err != nil {
-		log.Fatalf("Error converting string: %v\n", err)
+		log.Fatalf("Error converting string line 1: %v\n", err)
 	}
-	return width, height
+	h, err := strconv.Atoi(result[1])
+	if err != nil {
+		log.Fatalf("Error converting string line 2: %v\n", err)
+	}
+	vid.width = w
+	vid.height = h
+	return vid
 }
