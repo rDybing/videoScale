@@ -7,8 +7,15 @@ slack: rdybing
 
 Written in Go 1.9.2
 
------
-* Need ffmpeg installed - this includes necessary encoders and ffprobe utility. To install on Linux or WIn10-WSL (Debian/Ubuntu):
+------
+
+#### v1.1 Update Feb. 16th:
+
+Testing on Win10-WSL was not too happy about the aac encoder, as the WSL Ubuntu 16.04 distro of ffmpeg apparently is a bit dated and considers this 'experimental' unlike the ffmpeg distro in Ubuntu 17.10. Changed ffmpeg to force using this encoder however. Works fine.
+
+------
+
+Need ffmpeg installed - this includes necessary encoders and ffprobe utility. To install on Linux or WIn10-WSL (Debian/Ubuntu):
 
 > ~$ sudo apt-get install ffmpeg
 
