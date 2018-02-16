@@ -1,9 +1,9 @@
 ## videoScale
 #### Template for using ffmpeg and ffprobe to scale videofiles and output as .mp4
 
-CC-BY Roy Dybing, Feb. 2018
-github: rDybing
-slack: rdybing
+* CC-BY Roy Dybing, Feb. 2018
+* github: rDybing
+* slack: rdybing
 
 Written in Go 1.9.2
 
@@ -15,7 +15,7 @@ Testing on Win10-WSL was not too happy about the aac encoder, as the WSL Ubuntu 
 
 ------
 
-Need ffmpeg installed - this includes necessary encoders and ffprobe utility. To install on Linux or WIn10-WSL (Debian/Ubuntu):
+Need ffmpeg installed - this includes necessary encoders and ffprobe utility. To install on Linux or Win10-WSL (Debian/Ubuntu):
 
 > ~$ sudo apt-get install ffmpeg
 
