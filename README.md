@@ -9,6 +9,14 @@ Written in Go 1.9.2
 
 ------
 
+#### v1.2 Update Feb. 19th:
+
+Added Scale and Crop in one go, which saves one the quality degration of encoding twice if first cropping and then scaling.
+
+Whilst on the subject, optimized the scaling routine slightly. First check if even or odd, if odd make even. Second, if not divisible by 16, add two.
+
+------
+
 #### v1.1 Update Feb. 16th:
 
 Testing on Win10-WSL was not too happy about the aac encoder, as the WSL Ubuntu 16.04 distro of ffmpeg apparently is a bit dated and considers this 'experimental' unlike the ffmpeg distro in Ubuntu 17.10. Changed ffmpeg to force using this encoder however. Works fine.
