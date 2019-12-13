@@ -38,7 +38,7 @@ import (
 	"strings"
 )
 
-type video_t struct {
+type videoT struct {
 	width  int
 	height int
 }
@@ -81,9 +81,10 @@ func main() {
 	}
 }
 
-func getDimensions(inFile string) video_t {
+func getDimensions(inFile string) videoT {
 	fmt.Println("Getting Dimensions")
-	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "default=noprint_wrappers=1", inFile)
+	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of",
+		"default=noprint_wrappers=1", inFile)
 	cmdOutput := &bytes.Buffer{}
 	cmd.Stdout = cmdOutput
 	if err := cmd.Run(); err != nil {
@@ -95,7 +96,8 @@ func getDimensions(inFile string) video_t {
 
 func scaleAndCropNewFile(inFile string, outFile string) {
 	var scaleCmd = `scale=(iw*sar)*max(512/(iw*sar)\,512/ih):ih*max(512/(iw*sar)\,512/ih), crop=512:512`
-	cmd := exec.Command("ffmpeg", "-i", inFile, "-f", "mp4", "-c:v", "libx264", "-r", "30", "-vf", scaleCmd, "-c:a", "aac", "-strict", "-2", "-b:a", "128k", "-ar", "44100", outFile)
+	cmd := exec.Command("ffmpeg", "-i", inFile, "-f", "mp4", "-c:v", "libx264", "-r", "30", "-vf", scaleCmd,
+		"-c:a", "aac", "-strict", "-2", "-b:a", "128k", "-ar", "44100", outFile)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
@@ -104,9 +106,10 @@ func scaleAndCropNewFile(inFile string, outFile string) {
 	fmt.Println("Success Scale and Crop!")
 }
 
-func scaleNewFile(inFile string, outFile string, vid video_t) {
+func scaleNewFile(inFile string, outFile string, vid videoT) {
 	outSize := fmt.Sprintf("%d:%d", vid.width, vid.height)
-	cmd := exec.Command("ffmpeg", "-i", inFile, "-f", "mp4", "-c:v", "libx264", "-r", "30", "-s:v", outSize, "-c:a", "aac", "-strict", "-2", "-b:a", "128k", "-ar", "44100", outFile)
+	cmd := exec.Command("ffmpeg", "-i", inFile, "-f", "mp4", "-c:v", "libx264", "-r", "30", "-s:v", outSize,
+		"-c:a", "aac", "-strict", "-2", "-b:a", "128k", "-ar", "44100", outFile)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
@@ -115,8 +118,8 @@ func scaleNewFile(inFile string, outFile string, vid video_t) {
 	fmt.Println("Success Scale!")
 }
 
-func calcNewSize(in video_t) video_t {
-	var out video_t
+func calcNewSize(in videoT) videoT {
+	var out videoT
 	out.height = 512
 	scaleValue := float32(out.height) / float32(in.height)
 	out.width = int(float32(in.width) * scaleValue)
@@ -136,8 +139,8 @@ func getInput(helpText string) string {
 	return input
 }
 
-func cleanString(s string) video_t {
-	var vid video_t
+func cleanString(s string) videoT {
+	var vid videoT
 	s = strings.Replace(s, "width=", "", -1)
 	s = strings.Replace(s, "height=", "", -1)
 	result := strings.Split(s, "\n")
